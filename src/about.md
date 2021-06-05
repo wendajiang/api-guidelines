@@ -1,4 +1,4 @@
-# Rust API Guidelines
+# Rust API 准则
 
 This is a set of recommendations on how to design and present APIs for the Rust
 programming language. They are authored largely by the Rust library team, based
