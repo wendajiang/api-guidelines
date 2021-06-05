@@ -17,6 +17,7 @@ html {
 .content a > .hljs {
     /* color: var(--fg); */
     color: var(--links);
+    font-weight: bold;
 }
 
 /* Menu Bar */
