@@ -197,7 +197,7 @@ html {
 
 :not(pre):not(a) > .hljs {
     color: var(--inline-code-color);
-    background: #FFFBF6;
+    /* background: #FFFBF6; */
     overflow-x: initial;
 }
 
