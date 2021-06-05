@@ -1,15 +1,15 @@
-# Rust API Guidelines Checklist
+# Rust API 指导清单
 
 <!-- Read CONTRIBUTING.md before writing new guidelines -->
 
-- **Naming** *(crate aligns with Rust naming conventions)*
-  - Casing conforms to RFC 430 ([C-CASE])
-  - Ad-hoc conversions follow `as_`, `to_`, `into_` conventions ([C-CONV])
-  - Getter names follow Rust convention ([C-GETTER])
-  - Methods on collections that produce iterators follow `iter`, `iter_mut`, `into_iter` ([C-ITER])
-  - Iterator type names match the methods that produce them ([C-ITER-TY])
-  - Feature names are free of placeholder words ([C-FEATURE])
-  - Names use a consistent word order ([C-WORD-ORDER])
+- **命名** *(crate 遵照 Rust 命名规范)*
+  - 大小写规范 RFC 430 ([C-CASE])
+  - 遵循 `as_`, `to_`, `into_` 规范 用以特定类型转换 ([C-CONV])
+  - getter 命名规范 ([C-GETTER])
+  - 遵循 `iter`, `iter_mut`, `into_iter` 规范 用以生成迭代器 ([C-ITER])
+  - 生成迭代器的方法与迭代器类型同名 ([C-ITER-TY])
+  - cargo feature 名中不应该有无意义的词 ([C-FEATURE])
+  - 词性顺序一致 ([C-WORD-ORDER])
 - **Interoperability** *(crate interacts nicely with other library functionality)*
   - Types eagerly implement common traits ([C-COMMON-TRAITS])
     - `Copy`, `Clone`, `Eq`, `PartialEq`, `Ord`, `PartialOrd`, `Hash`, `Debug`,

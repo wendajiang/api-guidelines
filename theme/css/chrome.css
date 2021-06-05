@@ -17,7 +17,7 @@ html {
 .content a > .hljs {
     /* color: var(--fg); */
     color: var(--links);
-    font-weight: bold;
+    font-weight: normal;
 }
 
 /* Menu Bar */
@@ -197,6 +197,7 @@ html {
 
 :not(pre):not(a) > .hljs {
     color: var(--inline-code-color);
+    background: #FFFBF6;
     overflow-x: initial;
 }
 

@@ -27,5 +27,5 @@ Rust crate 的编写者应该站在符合 Rust 语言习惯、且相互协同的
 [Gitter channel]: https://gitter.im/rust-impl-period/WG-libs-guidelines
 [^guidelines]: 译者注：鉴于这本书的 *guidelines* 是“建议”而非“必须”，
 所以翻译成“原则”语义偏重，但是译者暂时没想到此处有比“原则”更通顺而精简的词语。
-此外，*guidelines* 在不同的语境下为了语句通顺会翻译成“指南”、“编写指南”、“指导”、
+此外，为了语句通顺， *guidelines* 在不同的语境下会翻译成“指南”、“编写指南”、“指导”、
 “指导建议”、“原则”之类的同义词。

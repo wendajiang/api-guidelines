@@ -1,85 +1,104 @@
-# Naming
+# 命名规范
 
 
 <a id="c-case"></a>
-## Casing conforms to RFC 430 (C-CASE)
+## 大小写规范 RFC 430 
 
-Basic Rust naming conventions are described in [RFC 430].
+> Casing conforms to RFC 430 (C-CASE)
 
-In general, Rust tends to use `UpperCamelCase` for "type-level" constructs (types and
-traits) and `snake_case` for "value-level" constructs. More precisely:
+基础的命名规范在 [RFC 430] 中有描述。
 
-| Item | Convention |
+通常，Rust 倾向于在“类型级别”（类型和 trait ）的结构中使用 `UpperCamelCase` ，
+在“值级别”的结构中使用 `snake_case` 。确切说：
+
+| Item | 规范 |
 | ---- | ---------- |
-| Crates | [unclear](https://github.com/rust-lang/api-guidelines/issues/29) |
+| Crates | [有争议](https://github.com/rust-lang/api-guidelines/issues/29) [^crate-name] |
 | Modules | `snake_case` |
 | Types | `UpperCamelCase` |
 | Traits | `UpperCamelCase` |
 | Enum variants | `UpperCamelCase` |
 | Functions | `snake_case` |
 | Methods | `snake_case` |
-| General constructors | `new` or `with_more_details` |
+| General constructors | `new` 或者 `with_more_details` |
 | Conversion constructors | `from_some_other_type` |
 | Macros | `snake_case!` |
 | Local variables | `snake_case` |
 | Statics | `SCREAMING_SNAKE_CASE` |
 | Constants | `SCREAMING_SNAKE_CASE` |
-| Type parameters | concise `UpperCamelCase`, usually single uppercase letter: `T` |
-| Lifetimes | short `lowercase`, usually a single letter: `'a`, `'de`, `'src` |
-| Features | [unclear](https://github.com/rust-lang/api-guidelines/issues/101) but see [C-FEATURE] |
+| Type parameters | 简明的 `UpperCamelCase` ，通常使用单个大写字母： `T` |
+| Lifetimes | 简短的 `lowercase`，通常使用单个小写字母 `'a`, `'de`, `'src` |
+| Features | [有争议](https://github.com/rust-lang/api-guidelines/issues/101) ，但是一般遵照 [C-FEATURE] |
 
-In `UpperCamelCase`, acronyms and contractions of compound words count as one word: use `Uuid` rather than `UUID`, `Usize` rather than `USize` or `Stdin` rather than `StdIn`. In `snake_case`, acronyms and contractions are lower-cased: `is_xid_start`.
+在 `UpperCamelCase` 情况下，复合词的首字母缩略词和缩略词算作一个单词：
+使用 `Uuid` 而不使用 `UUID`，使用 `Usize` 而不使用 `USize`，
+使用 `Stdin` 而不使用 `StdIn`。
+在 `snake_case` 情况下，首字母缩略词和缩略词都是小写： `is_xid_start` 。
 
-In `snake_case` or `SCREAMING_SNAKE_CASE`, a "word" should never consist of a
-single letter unless it is the last "word". So, we have `btree_map` rather than
-`b_tree_map`, but `PI_2` rather than `PI2`.
+在 `snake_case` 或者 `SCREAMING_SNAKE_CASE` 情况下，
+一个“单词”不应该由单个字母组成——除非这个字母时最后一个“词”：
+使用 `btree_map` 而不使用 `b_tree_map`，使用 `PI_2` 而不使用 `PI2` 。
 
-Crate names should not use `-rs` or `-rust` as a suffix or prefix. Every crate
-is Rust! It serves no purpose to remind users of this constantly.
+Crate 的名称不应该使用 `-rs` 或者 `-rust` 作为后缀或者前缀。
+因为每个 crate 都是 Rust 编写的！
+没必要一直提醒使用者这一点。
+
+[^crate-name]:译者注：一般是 `snake_case` 或 `kebab-case` ，但只能存在一种形式，
+且实际在 Rust 代码中使用时，后者需使用前者形式。
+如 [`use actix_web`](https://github.com/actix/actix-web) 
+
 
 [RFC 430]: https://github.com/rust-lang/rfcs/blob/master/text/0430-finalizing-naming-conventions.md
 [C-FEATURE]: #c-feature
 
-### Examples from the standard library
+来自标准库的例子：
 
-The whole standard library. This guideline should be easy!
+整个标准库都是这样做的。
+这条原则不难。
 
 
 <a id="c-conv"></a>
-## Ad-hoc conversions follow `as_`, `to_`, `into_` conventions (C-CONV)
+## 遵循 `as_`, `to_`, `into_` 规范 用以特定类型转换
 
-Conversions should be provided as methods, with names prefixed as follows:
+> Ad-hoc conversions follow `as_`, `to_`, `into_` conventions (C-CONV)
 
-| Prefix | Cost | Ownership |
+应该使用带有以下前缀名称方法来进行特定类型转换：
+
+| 名称前缀 | 内存代价 | 所有权 |
 | ------ | ---- | --------- |
-| `as_` | Free | borrowed -\> borrowed |
-| `to_` | Expensive | borrowed -\> borrowed<br>borrowed -\> owned (non-Copy types)<br>owned -\> owned (Copy types) |
-| `into_` | Variable | owned -\> owned (non-Copy types) |
+| `as_` | 无代价 | borrowed -\> borrowed |
+| `to_` | 代价昂贵 | borrowed -\> borrowed<br>borrowed -\> owned (非 Copy 类型)<br>owned -\> owned (Copy 类型) |
+| `into_` | 变量名 | owned -\> owned (非 Copy 类型) |
 
-For example:
+例如：
 
-- [`str::as_bytes()`] gives a view of a `str` as a slice of UTF-8 bytes, which
-  is free. The input is a borrowed `&str` and the output is a borrowed `&[u8]`.
-- [`Path::to_str`] performs an expensive UTF-8 check on the bytes of an
-  operating system path. The input and output are both borrowed. It would not be
-  correct to call this `as_str` because this method has nontrivial cost at
-  runtime.
-- [`str::to_lowercase()`] produces the Unicode-correct lowercase equivalent of a
-  `str`, which involves iterating through characters of the string and may
-  require memory allocation. The input is a borrowed `&str` and the output is an
-  owned `String`.
-- [`f64::to_radians()`] converts a floating point quantity from degrees to
-  radians. The input is `f64`. Passing a reference `&f64` is not warranted
-  because `f64` is cheap to copy. Calling the function `into_radians` would be
-  misleading because the input is not consumed.
-- [`String::into_bytes()`] extracts the underlying `Vec<u8>` of a `String`,
-  which is free. It takes ownership of a `String` and returns an owned
-  `Vec<u8>`.
-- [`BufReader::into_inner()`] takes ownership of a buffered reader and extracts
-  out the underlying reader, which is free. Data in the buffer is discarded.
-- [`BufWriter::into_inner()`] takes ownership of a buffered writer and extracts
-  out the underlying writer, which requires a potentially expensive flush of any
-  buffered data.
+- `as_`
+    - [`str::as_bytes()`] 
+      用于查看 UTF-8 字节的 `str` 切片，
+      这是无内存代价的（不会产生内存分配）。
+      传入值是 `&str` 类型，输出值是 `&[u8]` 类型。
+- `to_`
+    - [`Path::to_str`] 
+      对操作系统路径进行 UTF-8 字节检查，需要很大花销。
+      虽然输入和输出都是借用，但是这个方法对运行时产生不容忽视的代价，
+      所以不应使用 `as_str` 名称。
+    - [`str::to_lowercase()`] 
+      生成正确的 Unicode 小写字符，
+      涉及遍历字符串的字符，可能需要分配内存。
+      输入值是 `&str` 类型，输出值是 `String` 类型。
+    - [`f64::to_radians()`] 
+      把浮点数的角度制转换成弧度制。
+      输入和输出都是 `f64` 。没必要传入 `&f64` ，因为复制 `f64` 花销很小。
+      但是使用 `into_radians` 名称就会具有误导性，因为输入数据没有被消耗。
+- `into_`
+    - [`String::into_bytes()`]
+      从 `String` 提取出背后的 `Vec<u8>` 数据，这是无代价的。
+      它转移了 `String` 的所有权，然后返回具有所有权的 `Vec<u8>` 。
+    - [`BufReader::into_inner()`] 
+      转移了 buffered reader 的所有权，取出其背后的 reader ，这是无代价的。
+      存于缓冲区的数据被丢弃了。
+    - [`BufWriter::into_inner()`] 
+      转移了 buffered writer 的所有权，取出其背后的 writer ，这可能以很大的代价刷新所有缓存数据。
 
 [`str::as_bytes()`]: https://doc.rust-lang.org/std/primitive.str.html#method.as_bytes
 [`Path::to_str`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.to_str
@@ -89,35 +108,35 @@ For example:
 [`BufReader::into_inner()`]: https://doc.rust-lang.org/std/io/struct.BufReader.html#method.into_inner
 [`BufWriter::into_inner()`]: https://doc.rust-lang.org/std/io/struct.BufWriter.html#method.into_inner
 
-Conversions prefixed `as_` and `into_` typically _decrease abstraction_, either
-exposing a view into the underlying representation (`as`) or deconstructing data
-into its underlying representation (`into`). Conversions prefixed `to_`, on the
-other hand, typically stay at the same level of abstraction but do some work to
-change from one representation to another.
+以 `as_` 和 `into_` 作为前缀的类型转换通常 *减少了抽象* ，
+要么是查看背后的数据 ( `as` ) ，要么是分解 (deconstructe) 背后的数据 ( `into` ) 。
+相对地，以 `to_` 作为前缀的类型转换处于同一个抽象层次，
+但是做了更多的工作。
 
-When a type wraps a single value to associate it with higher-level semantics,
-access to the wrapped value should be provided by an `into_inner()` method. This
-applies to wrappers that provide buffering like [`BufReader`], encoding or
-decoding like [`GzDecoder`], atomic access like [`AtomicBool`], or any similar
-semantics.
+当一个类型用更高级别的语义 (higher-level semantics) 封装 (wraps) 一个与之有关的值时，
+应该使用 `into_inner()` 方法名来取出被封装的值。
+这适用于以下封装器：
+读取缓存 ([`BufReader`]) 、编码或解码 ([`GzDecoder`]) 、取出原子 ([`AtomicBool`]) 、
+或者任何相似的语义 ([`BufWriter`])。
 
 [`BufReader`]: https://doc.rust-lang.org/std/io/struct.BufReader.html#method.into_inner
-[`GzDecoder`]: https://docs.rs/flate2/0.2.19/flate2/read/struct.GzDecoder.html#method.into_inner
+[`GzDecoder`]: https://docs.rs/flate2/1.0.20/flate2/read/struct.GzDecoder.html#method.into_inner
 [`AtomicBool`]: https://doc.rust-lang.org/std/sync/atomic/struct.AtomicBool.html#method.into_inner
+[`BufWriter`]: https://doc.rust-lang.org/std/io/struct.BufWriter.html#method.into_inner
 
-If the `mut` qualifier in the name of a conversion method constitutes part of
-the return type, it should appear as it would appear in the type. For example
-[`Vec::as_mut_slice`] returns a mut slice; it does what it says. This name is
-preferred over `as_slice_mut`.
+如果类型转换方法返回的类型具有 `mut` 标识符，
+那么这个方法的名称应如同返回类型组成部分的顺序那样，带有 `mut` 名。
+比如 [`Vec::as_mut_slice`] 返回 `mut slice` 类型，这个方法的功能正如其名称所述，
+所以这个名称优于 `as_slice_mut` 。
 
 [`Vec::as_mut_slice`]: https://doc.rust-lang.org/std/vec/struct.Vec.html#method.as_mut_slice
 
-```rust
+```rust.ignored
 // Return type is a mut slice.
 fn as_mut_slice(&mut self) -> &mut [T];
 ```
 
-##### More examples from the standard library
+更多来自标准库的例子：
 
 - [`Result::as_ref`](https://doc.rust-lang.org/std/result/enum.Result.html#method.as_ref)
 - [`RefCell::as_ptr`](https://doc.rust-lang.org/std/cell/struct.RefCell.html#method.as_ptr)
@@ -126,57 +145,58 @@ fn as_mut_slice(&mut self) -> &mut [T];
 
 
 <a id="c-getter"></a>
-## Getter names follow Rust convention (C-GETTER)
+## getter 命名规范
 
-With a few exceptions, the `get_` prefix is not used for getters in Rust code.
+> Getter names follow Rust convention (C-GETTER)
 
-```rust
+在 Rust 代码中，getter 方法（用来访问或者获取数据的方法）
+并不使用 `get_` 前缀，但是也有一些例外。
+
+```rust,ignored
 pub struct S {
     first: First,
     second: Second,
 }
 
 impl S {
-    // Not get_first.
+    // Not `get_first`.
     pub fn first(&self) -> &First {
         &self.first
     }
 
-    // Not get_first_mut, get_mut_first, or mut_first.
+    // Not `get_first_mut`, `get_mut_first`, or `mut_first`.
     pub fn first_mut(&mut self) -> &mut First {
         &mut self.first
     }
 }
 ```
 
-The `get` naming is used only when there is a single and obvious thing that
-could reasonably be gotten by a getter. For example [`Cell::get`] accesses the
-content of a `Cell`.
+仅在访问或获得 一个事物 这种显而易见的情况时，使用 `get` 来命名才比较合理。
+比如 [`Cell::get`] 访问其 `Cell` 内容。
 
 [`Cell::get`]: https://doc.rust-lang.org/std/cell/struct.Cell.html#method.get
 
-For getters that do runtime validation such as bounds checking, consider adding
-unsafe `_unchecked` variants. Typically those will have the following
-signatures.
+对于在运行时进行验证（比如边界检查）的 getters ，
+考虑给 unsafe 的方法名称增加 `_unchecked` 。
+通常会有以下一些签名：
 
-```rust
+```rust,ignored
 fn get(&self, index: K) -> Option<&V>;
 fn get_mut(&mut self, index: K) -> Option<&mut V>;
 unsafe fn get_unchecked(&self, index: K) -> &V;
 unsafe fn get_unchecked_mut(&mut self, index: K) -> &mut V;
 ```
 
-The difference between getters and conversions ([C-CONV](#c-conv)) can be subtle
-and is not always clear-cut. For example [`TempDir::path`] can be understood as
-a getter for the filesystem path of the temporary directory, while
-[`TempDir::into_path`] is a conversion that transfers responsibility for
-deleting the temporary directory to the caller. Since `path` is a getter, it
-would not be correct to call it `get_path` or `as_path`.
+getter 和类型转换 (conversion | [C-CONV](#c-conv)) 之间的区别很小，
+大部分时候不那么清晰可辨。
+比如 [`TempDir::path`] 可以被理解为临时目录的文件系统路径的 getter ，
+而 [`TempDir::into_path`] 负责把删除临时目录时转换的数据传给调用者。
+因为 `path` 方法是一个 getter ，如果用 `get_path` 或者 `as_path` 就不对了。
 
-[`TempDir::path`]: https://docs.rs/tempdir/0.3.5/tempdir/struct.TempDir.html#method.path
-[`TempDir::into_path`]: https://docs.rs/tempdir/0.3.5/tempdir/struct.TempDir.html#method.into_path
+[`TempDir::path`]: https://docs.rs/tempdir/0.3.7/tempdir/struct.TempDir.html#method.path
+[`TempDir::into_path`]: https://docs.rs/tempdir/0.3.7/tempdir/struct.TempDir.html#method.into_path
 
-### Examples from the standard library
+来自标准库的例子：
 
 - [`std::io::Cursor::get_mut`](https://doc.rust-lang.org/std/io/struct.Cursor.html#method.get_mut)
 - [`std::ptr::Unique::get_mut`](https://doc.rust-lang.org/std/ptr/struct.Unique.html#method.get_mut)
@@ -187,13 +207,16 @@ would not be correct to call it `get_path` or `as_path`.
 
 
 <a id="c-iter"></a>
-## Methods on collections that produce iterators follow `iter`, `iter_mut`, `into_iter` (C-ITER)
+## 遵循 `iter`, `iter_mut`, `into_iter` 规范 用以生成迭代器 
 
-Per [RFC 199].
+> Methods on collections that produce iterators follow `iter`, `iter_mut`, `into_iter` (C-ITER)
+
+参考 [RFC 199] 。
+
 
 For a container with elements of type `U`, iterator methods should be named:
 
-```rust
+```rust,ignored
 fn iter(&self) -> Iter             // Iter implements Iterator<Item = &U>
 fn iter_mut(&mut self) -> IterMut  // IterMut implements Iterator<Item = &mut U>
 fn into_iter(self) -> IntoIter     // IntoIter implements Iterator<Item = U>
