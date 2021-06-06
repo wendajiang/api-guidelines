@@ -213,8 +213,7 @@ getter 和类型转换 (conversion | [C-CONV](#c-conv)) 之间的区别很小，
 
 参考 [RFC 199] 。
 
-
-For a container with elements of type `U`, iterator methods should be named:
+对于容纳 `U` 类型的容器 (container) ，其迭代器方法应该这样命名：
 
 ```rust,ignored
 fn iter(&self) -> Iter             // Iter implements Iterator<Item = &U>
@@ -222,25 +221,27 @@ fn iter_mut(&mut self) -> IterMut  // IterMut implements Iterator<Item = &mut U>
 fn into_iter(self) -> IntoIter     // IntoIter implements Iterator<Item = U>
 ```
 
-This guideline applies to data structures that are conceptually homogeneous
-collections. As a counterexample, the `str` type is slice of bytes that are
-guaranteed to be valid UTF-8. This is conceptually more nuanced than a
-homogeneous collection so rather than providing the
-`iter`/`iter_mut`/`into_iter` group of iterator methods, it provides
-[`str::bytes`] to iterate as bytes and [`str::chars`] to iterate as chars.
+这条原则适用于具有同质概念的集合型
+(conceptually homogeneous collections[^conceptually-homogeneous]) 数据结构。
+
+有一个反例： `str` 类型是有效 UTF-8 字节的切片，
+概念上与输出同类型的集合略有不同[^str-iter]，
+所以 `str` 没有提供一组 `iter`/`iter_mut`/`into_iter` 命名的迭代器方法，
+而是提供 [`str::bytes`] 方法来输出字节迭代器、
+[`str::chars`] 方法来输出字符迭代器。
 
 [`str::bytes`]: https://doc.rust-lang.org/std/primitive.str.html#method.bytes
 [`str::chars`]: https://doc.rust-lang.org/std/primitive.str.html#method.chars
-
-This guideline applies to methods only, not functions. For example
-[`percent_encode`] from the `url` crate returns an iterator over percent-encoded
-string fragments. There would be no clarity to be had by using an
-`iter`/`iter_mut`/`into_iter` convention.
-
-[`percent_encode`]: https://docs.rs/url/1.4.0/url/percent_encoding/fn.percent_encode.html
 [RFC 199]: https://github.com/rust-lang/rfcs/blob/master/text/0199-ownership-variants.md
+[^conceptually-homogeneous]: 译者注：可以观察到，
+这一组方法都输出相同的迭代器关联类型 `U` ，
+区别仅仅在于操作数据的所有权不同， `iter` 不可变借用、 `iter_mut` 可变借用、
+`into_iter` 独立的所有权，所以认为概念上类型相同。
 
-### Examples from the standard library
+[^str-iter]: 译者注：因为 `str` 需要转化为 **两种** 与之相关的同样重要的类型。
+这个“反例”是 [下面一条原则](#c-iter-ty) 的典型案例。
+
+来自标准库的例子：
 
 - [`Vec::iter`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.iter)
 - [`Vec::iter_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.iter_mut)
@@ -250,29 +251,39 @@ string fragments. There would be no clarity to be had by using an
 
 
 <a id="c-iter-ty"></a>
-## Iterator type names match the methods that produce them (C-ITER-TY)
+## 生成迭代器的方法与迭代器类型同名 
 
-A method called `into_iter()` should return a type called `IntoIter` and
-similarly for all other methods that return iterators.
+> Iterator type names match the methods that produce them (C-ITER-TY)
 
-This guideline applies chiefly to methods, but often makes sense for functions
-as well. For example the [`percent_encode`] function from the `url` crate
-returns an iterator type called [`PercentEncode`][PercentEncode-type].
+名为 `into_iter()` 的方法应该返回 `IntoIter` 类型的迭代器，
+类似地，不同名称的方法应返回对应类型的迭代器。[^iter-ty]
 
-[PercentEncode-type]: https://docs.rs/url/1.4.0/url/percent_encoding/struct.PercentEncode.html
-
-These type names make the most sense when prefixed with their owning module, for
-example [`vec::IntoIter`].
+当用在具有模块路径前缀的自定义迭代器类型时，
+这条原则就十分合理。比如 [`vec::IntoIter`] 。
 
 [`vec::IntoIter`]: https://doc.rust-lang.org/std/vec/struct.IntoIter.html
+[^iter-ty]: 译者注：这可能与 [上面一条原则](#c-iter) 看似矛盾，实则相辅相成。\
+可以把迭代器类型分成两类：与 `Iter` 概念上同质的迭代器；
+基于 `Iter` 型迭代器二度封装的迭代器。\
+前者命名规则和例子参考 [上一条原则](#c-iter) ；
+后者的典型例子是 `std::collections` 模块下的 
+[`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html) 、
+[`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html) ，
+它们各自定义了两种迭代器，二度封装的迭代器用于迭代 Keys 和 Values 。
+[`str::bytes`] 和 [`str::chars`] 
+也是基于 [`slice`](https://doc.rust-lang.org/std/slice/index.html#structs-1) 的
+[`Iter`](https://doc.rust-lang.org/std/slice/struct.Iter.html) 
+或 [`IterMut`](https://doc.rust-lang.org/std/slice/struct.IterMut.html) 封装的。
 
-### Examples from the standard library
 
-* [`Vec::iter`] returns [`Iter`][slice::Iter]
-* [`Vec::iter_mut`] returns [`IterMut`][slice::IterMut]
-* [`Vec::into_iter`] returns [`IntoIter`][vec::IntoIter]
-* [`BTreeMap::keys`] returns [`Keys`][btree_map::Keys]
-* [`BTreeMap::values`] returns [`Values`][btree_map::Values]
+
+来自标准库的例子：
+
+* [`Vec::iter`] 返回 [`Iter`][slice::Iter]
+* [`Vec::iter_mut`] 返回 [`IterMut`][slice::IterMut]
+* [`Vec::into_iter`] 返回 [`IntoIter`][vec::IntoIter]
+* [`BTreeMap::keys`] 返回 [`Keys`][btree_map::Keys]
+* [`BTreeMap::values`] 返回 [`Values`][btree_map::Values]
 
 [`Vec::iter`]: https://doc.rust-lang.org/std/vec/struct.Vec.html#method.iter
 [slice::Iter]: https://doc.rust-lang.org/std/slice/struct.Iter.html
@@ -287,15 +298,17 @@ example [`vec::IntoIter`].
 
 
 <a id="c-feature"></a>
-## Feature names are free of placeholder words (C-FEATURE)
+## cargo feature 名中不应该有无意义的词
 
-Do not include words in the name of a [Cargo feature] that convey zero meaning,
-as in `use-abc` or `with-abc`. Name the feature `abc` directly.
+> Feature names are free of placeholder words (C-FEATURE)
+
+给 [Cargo feature] 命名时，不要带有无实际含义的的词语，
+比如无需 `use-abc` 或 `with-abc` —— 直接以 `abc` 命名。
 
 [Cargo feature]: http://doc.crates.io/manifest.html#the-features-section
 
-This arises most commonly for crates that have an optional dependency on the
-Rust standard library. The canonical way to do this correctly is:
+这条原则经常出现在对 Rust 标准库进行可选依赖配置的 crate 上。
+最简洁且正确的做法是：
 
 ```toml
 # In Cargo.toml
@@ -305,7 +318,7 @@ default = ["std"]
 std = []
 ```
 
-```rust
+```rust,ignored
 // In lib.rs
 
 #![cfg_attr(not(feature = "std"), no_std)]
