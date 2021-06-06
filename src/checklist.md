@@ -10,17 +10,17 @@
   - 生成迭代器的方法与迭代器类型同名 ([C-ITER-TY])
   - cargo feature 名中不应该有无意义的词 ([C-FEATURE])
   - 词性顺序一致 ([C-WORD-ORDER])
-- **Interoperability** *(crate interacts nicely with other library functionality)*
-  - Types eagerly implement common traits ([C-COMMON-TRAITS])
+- **互通互用** *(crate 很好地与其他库提供的功能进行交互)*
+  - 类型应尽早实现常见的 traits ([C-COMMON-TRAITS])
     - `Copy`, `Clone`, `Eq`, `PartialEq`, `Ord`, `PartialOrd`, `Hash`, `Debug`,
       `Display`, `Default`
-  - Conversions use the standard traits `From`, `AsRef`, `AsMut` ([C-CONV-TRAITS])
-  - Collections implement `FromIterator` and `Extend` ([C-COLLECT])
-  - Data structures implement Serde's `Serialize`, `Deserialize` ([C-SERDE])
-  - Types are `Send` and `Sync` where possible ([C-SEND-SYNC])
-  - Error types are meaningful and well-behaved ([C-GOOD-ERR])
-  - Binary number types provide `Hex`, `Octal`, `Binary` formatting ([C-NUM-FMT])
-  - Generic reader/writer functions take `R: Read` and `W: Write` by value ([C-RW-VALUE])
+  - 使用 `From`, `AsRef`, `AsMut` trait 来转换类型 ([C-CONV-TRAITS])
+  - 给集合实现 `FromIterator` 和 `Extend` trait ([C-COLLECT])
+  - 给数据结构实现 Serde 的 `Serialize` 和 `Deserialize` trait ([C-SERDE])
+  - 类型应尽可能实现 `Send` 和 `Sync` trait ([C-SEND-SYNC])
+  - Error 类型 十分直观和有用 ([C-GOOD-ERR])
+  - 二进制数类型应提供 `Hex`, `Octal`, `Binary` 的格式化方式 ([C-NUM-FMT])
+  - reader/writer 泛型函数使用 `R: Read` 和 `W: Write` 参数传值 ([C-RW-VALUE])
 - **Macros** *(crate presents well-behaved macros)*
   - Input syntax is evocative of the output ([C-EVOCATIVE])
   - Macros compose well with attributes ([C-MACRO-ATTR])
