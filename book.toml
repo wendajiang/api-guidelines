@@ -1,5 +1,5 @@
 [book]
-title = "Rust API Guidelines（Rust API 指南）"
+title = "Rust API Guidelines（Rust API 编写指南）"
 description = "关于如何设计和呈现 Rust APIs 的一些建议"
 language = "zh"
 
