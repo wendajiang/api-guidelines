@@ -307,7 +307,7 @@ fn into_iter(self) -> IntoIter     // IntoIter implements Iterator<Item = U>
 
 [Cargo feature]: http://doc.crates.io/manifest.html#the-features-section
 
-这条原则经常出现在对 Rust 标准库进行可选依赖配置的 crate 上。
+这条原则经常出现在对 Rust 标准库进行 [可选依赖][optional-dependency] 配置的 crate 上。
 最简洁且正确的做法是：
 
 ```toml
@@ -324,10 +324,9 @@ std = []
 #![cfg_attr(not(feature = "std"), no_std)]
 ```
 
-Do not call the feature `use-std` or `with-std` or any creative name that is not
-`std`. This naming convention aligns with the naming of implicit features
-inferred by Cargo for optional dependencies. Consider crate `x` with optional
-dependencies on Serde and on the Rust standard library:
+这个例子中，不要给 feature 取 `use-std` 或者 `with-std` 或者除 `std` 之外另取名字。
+feature 应与 Cargo 在推断可选依赖时隐含的 features 具有一致的名字。
+假如 `x` crate 对 Serde 和 标准库具有可选依赖关系：
 
 ```toml
 [package]
@@ -341,20 +340,22 @@ std = ["serde/std"]
 serde = { version = "1.0", optional = true }
 ```
 
-When we depend on `x`, we can enable the optional Serde dependency with
-`features = ["serde"]`. Similarly we can enable the optional standard library
-dependency with `features = ["std"]`. The implicit feature inferred by Cargo for
-the optional dependency is called `serde`, not `use-serde` or `with-serde`, so
-we like for explicit features to behave the same way.
+当我们使用 `x` crate 时，可以使用 `features = ["serde"]` 开启 Serde 依赖。
+类似地，也可以使用 `features = ["std"]` 开启标准库依赖。
+Cargo 推断的隐含的 features 应该叫做 `serde` ，
+而不是 `use-serde` 或者 `with-serde` 。
 
-As a related note, Cargo requires that features are additive so a feature named
-negatively like `no-abc` is practically never correct.
+与之相关的是， Cargo 要求 features 应该是附加的，
+所以像 `no-abc` 的 feature 命名实际上并不正确。
 
+[optional-dependency]:https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
 
 <a id="c-word-order"></a>
-## Names use a consistent word order (C-WORD-ORDER)
+## 词性顺序一致 
 
-Here are some error types from the standard library:
+> Names use a consistent word order (C-WORD-ORDER)
+
+以下是来自标准库的处理错误的一些类型：
 
 - [`JoinPathsError`](https://doc.rust-lang.org/std/env/struct.JoinPathsError.html)
 - [`ParseBoolError`](https://doc.rust-lang.org/std/str/struct.ParseBoolError.html)
@@ -364,10 +365,12 @@ Here are some error types from the standard library:
 - [`RecvTimeoutError`](https://doc.rust-lang.org/std/sync/mpsc/enum.RecvTimeoutError.html)
 - [`StripPrefixError`](https://doc.rust-lang.org/std/path/struct.StripPrefixError.html)
 
-All of these use verb-object-error word order. If we were adding an error to
-represent an address failing to parse, for consistency we would want to name it
-in verb-object-error order like `ParseAddrError` rather than `AddrParseError`.
 
-The particular choice of word order is not important, but pay attention to
-consistency within the crate and consistency with similar functionality in the
-standard library.
+这些名称都按照 **动词-宾语-error** 的单词顺序。
+如果增加“解析地址错误”类型，为了保持词性一致，
+应该使用 `ParseAddrError` 名称，而不是 `AddrParseError` 名称。 
+
+具体选择什么样的词性顺序并不重要，
+但务必在一个 crate 里注意要保持这样的顺序；
+若提供与标准库中相似功能的东西时，
+也要与标准库名称的词性顺序一致。
