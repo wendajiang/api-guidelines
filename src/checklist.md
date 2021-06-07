@@ -68,9 +68,9 @@
   - Structs have private fields ([C-STRUCT-PRIVATE])
   - Newtypes encapsulate implementation details ([C-NEWTYPE-HIDE])
   - Data structures do not duplicate derived trait bounds ([C-STRUCT-BOUNDS])
-- **Necessities** *(to whom they matter, they really matter)*
-  - Public dependencies of a stable crate are stable ([C-STABLE])
-  - Crate and its dependencies have a permissive license ([C-PERMISSIVE])
+- **必要项** *( 对于使用者来说，这真的很重要 )*
+  - 稳定版 crate 必须具有稳定的公有依赖 ([C-STABLE])
+  - crate 及其依赖必须有许可证 ([C-PERMISSIVE])
 
 
 [C-CASE]: naming.html#c-case
