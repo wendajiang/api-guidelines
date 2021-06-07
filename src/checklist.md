@@ -60,9 +60,9 @@
   - Functions validate their arguments ([C-VALIDATE])
   - Destructors never fail ([C-DTOR-FAIL])
   - Destructors that may block have alternatives ([C-DTOR-BLOCK])
-- **Debuggability** *(crate is conducive to easy debugging)*
-  - All public types implement `Debug` ([C-DEBUG])
-  - `Debug` representation is never empty ([C-DEBUG-NONEMPTY])
+- **可调试** *( crate 易于调试 )*
+  - 所有公有的类型都应该实现 `Debug` ([C-DEBUG])
+  - `Debug` 呈现的内容永远不为空 ([C-DEBUG-NONEMPTY])
 - **Future proofing** *(crate is free to improve without breaking users' code)*
   - Sealed traits protect against downstream implementations ([C-SEALED])
   - Structs have private fields ([C-STRUCT-PRIVATE])

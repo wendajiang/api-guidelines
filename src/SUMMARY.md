@@ -15,4 +15,4 @@
 - [经得起检验](future-proofing.md)
 - [必要项](necessities.md)
 
-[拓展链接](external-links.md)
+[拓展阅读](external-links.md)
