@@ -2,7 +2,7 @@
 
 <!-- Read CONTRIBUTING.md before writing new guidelines -->
 
-- **命名** *(crate 遵照 Rust 命名规范)*
+- **命名** *( crate 遵照 Rust 命名规范 )*
   - 大小写规范 RFC 430 ([C-CASE])
   - 遵循 `as_`, `to_`, `into_` 规范 用以特定类型转换 ([C-CONV])
   - getter 命名规范 ([C-GETTER])
@@ -10,7 +10,7 @@
   - 生成迭代器的方法与迭代器类型同名 ([C-ITER-TY])
   - cargo feature 名中不应该有无意义的词 ([C-FEATURE])
   - 词性顺序一致 ([C-WORD-ORDER])
-- **互通互用** *(crate 很好地与其他库提供的功能进行交互)*
+- **互通互用** *( crate 很好地与其他库提供的功能进行交互 )*
   - 类型应尽早实现常见的 traits ([C-COMMON-TRAITS])
     - `Copy`, `Clone`, `Eq`, `PartialEq`, `Ord`, `PartialOrd`, `Hash`, `Debug`,
       `Display`, `Default`
@@ -21,24 +21,23 @@
   - Error 类型 十分直观和有用 ([C-GOOD-ERR])
   - 二进制数类型应提供 `Hex`, `Octal`, `Binary` 的格式化方式 ([C-NUM-FMT])
   - reader/writer 泛型函数使用 `R: Read` 和 `W: Write` 参数传值 ([C-RW-VALUE])
-- **Macros** *(crate presents well-behaved macros)*
-  - Input syntax is evocative of the output ([C-EVOCATIVE])
-  - Macros compose well with attributes ([C-MACRO-ATTR])
-  - Item macros work anywhere that items are allowed ([C-ANYWHERE])
-  - Item macros support visibility specifiers ([C-MACRO-VIS])
-  - Type fragments are flexible ([C-MACRO-TY])
-- **Documentation** *(crate is abundantly documented)*
-  - Crate level docs are thorough and include examples ([C-CRATE-DOC])
-  - All items have a rustdoc example ([C-EXAMPLE])
-  - Examples use `?`, not `try!`, not `unwrap` ([C-QUESTION-MARK])
-  - Function docs include error, panic, and safety considerations ([C-FAILURE])
-  - Prose contains hyperlinks to relevant things ([C-LINK])
-  - Cargo.toml includes all common metadata ([C-METADATA])
-    - authors, description, license, homepage, documentation, repository,
-      readme, keywords, categories
-  - Crate sets html_root_url attribute "https://docs.rs/CRATE/X.Y.Z" ([C-HTML-ROOT])
-  - Release notes document all significant changes ([C-RELNOTES])
-  - Rustdoc does not show unhelpful implementation details ([C-HIDDEN])
+- **宏** *( crate 应展现良好的宏 )*
+  - 输入语法与输出语法一致 ([C-EVOCATIVE])
+  - 宏与属性形成有机的整体 ([C-MACRO-ATTR])
+  - 生成条目的宏可以在条目被允许的地方使用 ([C-ANYWHERE])
+  - 生成条目的宏应支持可视分类符 ([C-MACRO-VIS])
+  - 类型分类符 `$t:ty` 是灵活的 ([C-MACRO-TY])
+- **文档编写** *( crate 有丰富的文档说明 )*
+  - crate 级别的文档应该详实有例 ([C-CRATE-DOC])
+  - 每个条目都应该有例子 ([C-EXAMPLE])
+  - 例子应该使用 `?` 而不使用 `try!` 或者 `unwrap` ([C-QUESTION-MARK])
+  - 函数涉及错误、 panic、安全性时 应该加以说明 ([C-FAILURE])
+  - 给相关的内容添加超链接 ([C-LINK])
+  - Cargo.toml 应包含所有常见的配置数据 ([C-METADATA])
+    - 作者、描述、版权、主页、文档、仓库、readme、关键词、分类
+  - 设置 html_root_url 属性 "https://docs.rs/CRATE/X.Y.Z" ([C-HTML-ROOT])
+  - 发布时 记录该版本的重大变化 ([C-RELNOTES])
+  - 文档不应该展示无太大帮助的实现细节 ([C-HIDDEN])
 - **Predictability** *(crate enables legible code that acts how it looks)*
   - Smart pointers do not add inherent methods ([C-SMART-PTR])
   - Conversions live on the most specific type involved ([C-CONV-SPECIFIC])

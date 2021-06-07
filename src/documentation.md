@@ -1,34 +1,37 @@
-# Documentation
+# 文档编写
 
 
 <a id="c-crate-doc"></a>
-## Crate level docs are thorough and include examples (C-CRATE-DOC)
+## crate 级别的文档应该详实有例 
 
-See [RFC 1687].
+> Crate level docs are thorough and include examples (C-CRATE-DOC)
+
+参考 [RFC 1687] 。
 
 [RFC 1687]: https://github.com/rust-lang/rfcs/pull/1687
 
 
 <a id="c-example"></a>
-## All items have a rustdoc example (C-EXAMPLE)
+## 每个条目都应该有例子 
 
-Every public module, trait, struct, enum, function, method, macro, and type
-definition should have an example that exercises the functionality.
+> All items have a rustdoc example (C-EXAMPLE)
 
-This guideline should be applied within reason.
+每个公有的 模块、 trait 、结构体、枚举体、函数、方法、宏、类型定义 ，
+都应该有展示其功能和使用方法的例子。
 
-A link to an applicable example on another item may be sufficient. For example
-if exactly one function uses a particular type, it may be appropriate to write a
-single example on either the function or the type and link to it from the other.
+这条原则应该在合理的地方使用。
 
-The purpose of an example is not always to show *how to use* the item. Readers
-can be expected to understand how to invoke functions, match on enums, and other
-fundamental tasks. Rather, an example is often intended to show *why someone
-would want to use* the item.
+以链接的形式关联另一个条目的使用例子可能就足够了。
+比如一个函数用到一个具体的类型，合适的做法是：
+给这个函数或者类型写一个例子，然后链接这个例子到另一个。
 
-```rust
-// This would be a poor example of using clone(). It mechanically shows *how* to
-// call clone(), but does nothing to show *why* somebody would want this.
+写例子的目的不一定仅仅是展示 **如何使用** 这个条目。
+阅读它的人可以理解怎样调用函数、匹配枚举体 和 其他基础的用法。
+但更多时候，例子通常用来展示 **为什么** 使用者愿意去使用这个条目。
+
+```rust,ignored
+// 这就是一个关于 `.clone()` 的不好的例子。
+// 它死板地展示如何调用 clone() ，而完全没有表明 *为什么* 需要这样做。
 fn main() {
     let hello = "hello";
 
@@ -38,17 +41,18 @@ fn main() {
 
 
 <a id="c-question-mark"></a>
-## Examples use `?`, not `try!`, not `unwrap` (C-QUESTION-MARK)
+## 例子应该使用 `?` 而不使用 `try!` 或者 `unwrap` 
 
-Like it or not, example code is often copied verbatim by users. Unwrapping an
-error should be a conscious decision that the user needs to make.
+> Examples use `?`, not `try!`, not `unwrap` (C-QUESTION-MARK)
 
-A common way of structuring fallible example code is the following. The lines
-beginning with `#` are compiled by `cargo test` when building the example but
-will not appear in user-visible rustdoc.
+不管你喜不喜欢这样做，例子里的代码通常会被使用者一字不落地复制下来。
+使用者应该慎重地决定怎样处理每个错误。
+
+一个容易出错的代码示例通常是按照下面的方式来写：
+由 `cargo test` 编译测试代码块，
 
 ```
-/// ```rust
+/// ```rust,ignored
 /// # use std::error::Error;
 /// #
 /// # fn main() -> Result<(), Box<dyn Error>> {
@@ -61,16 +65,32 @@ will not appear in user-visible rustdoc.
 /// ```
 ```
 
+但以 `#` 开头的每行代码不会出现在读者可见的 rustdoc 里。
+
+```rust,ignored
+# use std::error::Error;
+#
+# fn main() -> Result<(), Box<dyn Error>> {
+your;
+example?;
+code;
+#
+#     Ok(())
+# }
+```
+
+
 
 <a id="c-failure"></a>
-## Function docs include error, panic, and safety considerations (C-FAILURE)
+## 函数涉及错误、 panic、安全性时 应该加以说明 
 
-Error conditions should be documented in an "Errors" section. This applies to
-trait methods as well -- trait methods for which the implementation is allowed
-or expected to return an error should be documented with an "Errors" section.
+> Function docs include error, panic, and safety considerations (C-FAILURE)
 
-For example in the standard library, Some implementations of the
-[`std::io::Read::read`] trait method may return an error.
+引发错误的条件应该在 "Errors" 标题下说明。
+这也适用于 trait 方法 —— 可以或者可能返回错误的方法都应该在 "Errors" 小节进行说明。
+
+比如以下标准库里的例子，
+[`std::io::Read::read`] trait 里某个方法可能会返回一个错误。
 
 [`std::io::Read::read`]: https://doc.rust-lang.org/std/io/trait.Read.html#tymethod.read
 
@@ -87,11 +107,10 @@ For example in the standard library, Some implementations of the
 /// guaranteed that no bytes were read.
 ```
 
-Panic conditions should be documented in a "Panics" section. This applies to
-trait methods as well -- traits methods for which the implementation is allowed
-or expected to panic should be documented with a "Panics" section.
+引发 panic 的条件应该在 "Panics" 标题下说明。
+这也适用于 trait 方法 —— 可以或者可能导致 panic 的方法都应该在 "Errors" 小节进行说明。
 
-In the standard library the [`Vec::insert`] method may panic.
+标准库里的 [`Vec::insert`] 方法可能会 panic ：
 
 [`Vec::insert`]: https://doc.rust-lang.org/std/vec/struct.Vec.html#method.insert
 
@@ -104,12 +123,11 @@ In the standard library the [`Vec::insert`] method may panic.
 /// Panics if `index` is out of bounds.
 ```
 
-It is not necessary to document all conceivable panic cases, especially if the
-panic occurs in logic provided by the caller. For example documenting the
-`Display` panic in the following code seems excessive. But when in doubt, err on
-the side of documenting more panic cases.
+没必要把所有可能想到的 panic 情况都进行说明，
+尤其是如果 panic 发生在调用期间有逻辑错误的时候。
+以如下的方式说明 `Display` 会 panic 就显得多余了。
 
-```rust
+```rust,ignored
 /// # Panics
 ///
 /// This function panics if `T`'s implementation of `Display` panics.
@@ -118,11 +136,9 @@ pub fn print<T: Display>(t: T) {
 }
 ```
 
-Unsafe functions should be documented with a "Safety" section that explains all
-invariants that the caller is responsible for upholding to use the function
-correctly.
+unsafe 的函数应该放在 "Safety" 小节，用来解释如何正确使用这个函数。
 
-The unsafe [`std::ptr::read`] requires the following of the caller.
+例如，不安全的 [`std::ptr::read`] 方法必须在以下情况才能被调用：
 
 [`std::ptr::read`]: https://doc.rust-lang.org/std/ptr/fn.read.html
 
@@ -144,44 +160,45 @@ The unsafe [`std::ptr::read`] requires the following of the caller.
 
 
 <a id="c-link"></a>
-## Prose contains hyperlinks to relevant things (C-LINK)
+## 给相关的内容添加超链接 
 
-Regular links can be added inline with the usual markdown syntax of
-`[text](url)`. Links to other types can be added by marking them with
-``[`text`]``, then adding the link target in a new line at the end of
-the docstring with ``[`text`]: <target>``, where `<target>` is
-described below.
+> Prose contains hyperlinks to relevant things (C-LINK)
 
-Link targets to methods within the same type usually look like this:
+一般使用 markdown 超链接语法 `[text](url)` 来设置超链接。
+链接到某个类型则可以使用 ``[`text`]`` 语法来标注，
+在 docstring 底部另起一行，使用 ``[`text`]: <target>`` 来添加链接地址，
+这里的 `<target>` 下面会谈到。
+
+通常这样做来链接到这个类型的方法：
 
 ```md
 [`serialize_struct`]: #method.serialize_struct
 ```
 
-Link targets to other types usually look like this:
+通常这样做来链接到其他类型：
 
 ```md
 [`Deserialize`]: trait.Deserialize.html
 ```
 
-Link targets may also point to a parent or child module:
+也可以链接到父模块或者子模块：
 
 ```md
 [`Value`]: ../enum.Value.html
 [`DeserializeOwned`]: de/trait.DeserializeOwned.html
 ```
 
-This guideline is officially recommended by RFC 1574 under the heading ["Link
-all the things"].
+这条原则由 RFC 1574 正式推荐，可参考其 ["Link all the things"] 部分。
 
 ["Link all the things"]: https://github.com/rust-lang/rfcs/blob/master/text/1574-more-api-documentation-conventions.md#link-all-the-things
 
 
 <a id="c-metadata"></a>
-## Cargo.toml includes all common metadata (C-METADATA)
+## Cargo.toml 应包含所有常见的配置数据 
 
-The `[package]` section of `Cargo.toml` should include the following
-values:
+> Cargo.toml includes all common metadata (C-METADATA)
+
+在 `Cargo.toml` 的 `[package]` 部分应该要有以下内容：
 
 - `authors`
 - `description`
@@ -191,26 +208,26 @@ values:
 - `keywords`
 - `categories`
 
-In addition, there are two optional metadata fields:
+此外，这两个配置字段可选填：
 
 - `documentation`
 - `homepage`
 
-By default, *crates.io* links to documentation for the crate on [*docs.rs*]. The
-`documentation` metadata only needs to be set if the documentation is hosted
-somewhere other than *docs.rs*, for example because the crate links against a
-shared library that is not available in the build environment of *docs.rs*.
+*crates.io* 默认会把已发布的 crate 文档链接到 [*docs.rs*] 。
+`documentation` 配置信息在文档发布到 *docs.rs* 之外的地方时才需要填写。
+比如这个 crate 链接了不在 *docs.rs* 上构建的共享库。
 
 [*docs.rs*]: https://docs.rs
 
-The `homepage` metadata should only be set if there is a unique website for the
-crate other than the source repository or API documentation. Do not make
-`homepage` redundant with either the `documentation` or `repository` values. For
-example, serde sets `homepage` to *https://serde.rs*, a dedicated website.
+`homepage` 配置信息只填写除源码仓库或 API 文档网址之外的单独网站。
+不要让 `homepage` 和 `documentation` 或者 `repository` 的值重复。
+比如 serde 设置其 `homepage` 为 *https://serde.rs* 。
 
 [C-HTML-ROOT]: #c-html-root
 <a id="c-html-root"></a>
-### Crate sets html_root_url attribute (C-HTML-ROOT)
+## 设置 html_root_url 属性 "https://docs.rs/CRATE/X.Y.Z"  
+
+> Crate sets html_root_url attribute (C-HTML-ROOT)
 
 <!--
 Remove this guideline once rustdoc links no-deps documentation with no
@@ -218,55 +235,58 @@ html_root_url to docs.rs by default.
 https://github.com/rust-lang/rust/issues/42301
 -->
 
-It should point to `"https://docs.rs/CRATE/MAJOR.MINOR.PATCH"`,
-assuming the crate uses docs.rs for its primary API documentation.
+加入 crate 使用 docs.rs 作为其主要的 API 文档平台，
+那么 `html_root_url` 应该指向 `"https://docs.rs/CRATE/MAJOR.MINOR.PATCH"` 地址。[^html_root_url]
 
-The `html_root_url` attribute tells rustdoc how to create URLs to
-items in the crate when compiling downstream crates. Without it, links
-in the documentation of crates that depend on your crate will be
-incorrect.
+在编译下游 crates 时， `html_root_url` 属性告诉 rustdoc 
+如何生成指向条目的 URLs 。
+如果没有这个属性，依赖于这个 crate 的其他 crates 里的文档链接地址就不正确。
 
-```rust
+```rust,ignored
 #![doc(html_root_url = "https://docs.rs/log/0.3.8")]
 ```
 
-Because this URL contains an exact version number, it must be kept in
-sync with the version number in `Cargo.toml`. The [`version-sync`]
-crate can help with this by letting you add an integration test that
-fails if the `html_root_url` version number is out of sync with the
-crate version.
+因为这个 URL 包含确定的版本号，所以这个版本号必须和 `Cargo.toml` 里的版本号同步。
+[`version-sync`] crate 能帮助你做集成测试，当 `html_root_url` 
+里的版本号落后于 crate 的版本号时，测试不通过。
 
 [`version-sync`]: https://crates.io/crates/version-sync
 
-If you do not like that mechanism, it is recommended to add a comment
-to the `Cargo.toml` version key reminding yourself to keep the two
-updated together, like:
+如果你不喜欢使用 [`version-sync`] 提供的测试机制，那么建议你在 `Cargo.toml` 
+里 version 一行添加注释来 *提醒你* 保持这两者同步，就像：
 
 ```toml
 version = "0.3.8" # remember to update html_root_url
 ```
 
-For documentation hosted outside of docs.rs, the value for `html_root_url` is
-correct if appending the crate name + index.html takes you to the documentation
-of the crate's root module. For example if the documentation of the root module
-is located at `"https://api.rocket.rs/rocket/index.html"` then the
-`html_root_url` would be `"https://api.rocket.rs"`.
+对于发布在 docs.rs 之外的文档， `html_root_url` 得设置成一个增加
+*crate 名 + index.html* 之后能访问到 crate 根目录文档的地址。
+比如 crate 的根目录文档地址是 `"https://api.rocket.rs/rocket/index.html"` ，
+那么 `html_root_url` 的值应该填成 `"https://api.rocket.rs"` 。
 
+[^html_root_url]: 译者注：当 rustdoc 支持不设置 `html_root_url` 默认就指向 docs.rs
+的功能之后，这条原则就可以删除。见 
+[issue 42301](https://github.com/rust-lang/rust/issues/42301) 。
+此外，你还可以看看文档 [rustdoc: html_root_url] 和 [cargo doc] 。
+
+[rustdoc: html_root_url]:https://doc.rust-lang.org/rustdoc/the-doc-attribute.html#html_root_url
+[cargo doc]: https://doc.rust-lang.org/cargo/commands/cargo-doc.html
 
 <a id="c-relnotes"></a>
-## Release notes document all significant changes (C-RELNOTES)
+## 发布时 记录该版本的重大变化 
 
-Users of the crate can read the release notes to find a summary of what
-changed in each published release of the crate. A link to the release notes,
-or the notes themselves, should be included in the crate-level documentation
-and/or the repository linked in Cargo.toml.
+> Release notes document all significant changes (C-RELNOTES)
 
-Breaking changes (as defined in [RFC 1105]) should be clearly identified in the
-release notes.
+crate 的使用者能从版本说明 (release note) 中找到每个发布版本的更改概要。
+这些版本说明或者其链接应该在 crate 根文档 以及/或者 
+Cargo.toml 填写的仓库说明 里有介绍。
 
-If using Git to track the source of a crate, every release published to
-*crates.io* should have a corresponding tag identifying the commit that was
-published. A similar process should be used for non-Git VCS tools as well.
+不兼容的变更 （正如 [RFC 1105] 所定义） 应该清楚地写在版本说明里。
+
+如果使用 Git 来追踪 crate 源代码，那么每个发布到 *crates.io* 上的版本
+应该有对应的标签 (tag) 来标记这次已发布的提交记录。
+不使用 Git 的版本控制工具也应该用类似的方式进行处理。
+参考以下 Git 命令：
 
 ```bash
 # Tag the current commit
@@ -274,12 +294,12 @@ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.3.0" 0.3
 git push --tags
 ```
 
-Annotated tags are preferred because some Git commands ignore unannotated tags
-if any annotated tags exist.
+有注释的 tag 会更好，因为一些 Git 命令会在有注释 tag 存在的情况下
+忽略不带注释的 tag 。
 
 [RFC 1105]: https://github.com/rust-lang/rfcs/blob/master/text/1105-api-evolution.md
 
-### Examples
+例子：
 
 - [Serde 1.0.0 release notes](https://github.com/serde-rs/serde/releases/tag/v1.0.0)
 - [Serde 0.9.8 release notes](https://github.com/serde-rs/serde/releases/tag/v0.9.8)
@@ -288,19 +308,22 @@ if any annotated tags exist.
 
 
 <a id="c-hidden"></a>
-## Rustdoc does not show unhelpful implementation details (C-HIDDEN)
+## 文档不应该展示无太大帮助的实现细节 
 
-Rustdoc is supposed to include everything users need to use the crate fully and
-nothing more. It is fine to explain relevant implementation details in prose but
-they should not be real entries in the documentation.
+> Rustdoc does not show unhelpful implementation details (C-HIDDEN)
 
-Especially be selective about which impls are visible in rustdoc -- all the ones
-that users would need for using the crate fully, but no others. In the following
-code the rustdoc of `PublicError` by default would show the `From<PrivateError>`
-impl. We choose to hide it with `#[doc(hidden)]` because users can never have a
-`PrivateError` in their code so this impl would never be relevant to them.
+rustdoc 应该包含帮助使用者充分使用该 crate 的所有信息。
+解释相关的实现细节是可以的，
+但是不应该在文档里展开论述这些细节。
 
-```rust
+尤其应该挑选哪些条目可以在 rustdoc 展示出来 —— 
+展示那些让使用者完全掌握使用这个 crate 的内容，
+其他的内容不展示。
+下面代码中给 `PublicError` 实现 `From<PrivateError>` 的 rustdoc 文档会默认展示出来，
+使用 `#[doc(hidden)]` 来隐藏它，因为用户不会在代码里面用到私有的 `PrivateError` ，
+所以这个 impl 块对用户来说完全无关。
+
+```rust,ignored
 // This error type is returned to users.
 pub struct PublicError { /* ... */ }
 
@@ -316,8 +339,8 @@ impl From<PrivateError> for PublicError {
 }
 ```
 
-[`pub(crate)`] is another great tool for removing implementation details from
-the public API. It allows items to be used from outside of their own module but
-not outside of the same crate.
+[`pub(crate)`] 是一个很棒的工具，它从公有 API 移除掉实现的细节：\
+让条目于 定义所在的模块之外 被使用，但 定义所在的 crate 之外 无法被使用。
+（仅让条目在 crate 内可见，在 crate 之外不可见）
 
 [`pub(crate)`]: https://github.com/rust-lang/rfcs/blob/master/text/1422-pub-restricted.md

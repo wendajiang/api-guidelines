@@ -1,49 +1,48 @@
-# Macros
+# 宏
 
 
 <a id="c-evocative"></a>
-## Input syntax is evocative of the output (C-EVOCATIVE)
+## 输入语法与输出语法一致
 
-Rust macros let you dream up practically whatever input syntax you want. Aim to
-keep input syntax familiar and cohesive with the rest of your users' code by
-mirroring existing Rust syntax where possible. Pay attention to the choice and
-placement of keywords and punctuation.
+> Input syntax is evocative of the output (C-EVOCATIVE)
 
-A good guide is to use syntax, especially keywords and punctuation, that is
-similar to what will be produced in the output of the macro.
+Rust 宏系统允许你创造出你想要的输入语法。
+尽量让输入的语法是让大多数人感到熟悉的，
+仿照现存的 Rust 语法以便让使用者的代码风格统一。
+注意对关键字和标点符号的选择与更改。
 
-For example if your macro declares a struct with a particular name given in the
-input, preface the name with the keyword `struct` to signal to readers that a
-struct is being declared with the given name.
+好的标准是：宏输入的语法与输出的结果不会相差太大，尤其在关键字和标点符号方面。
 
-```rust
-// Prefer this...
+比如你写的宏要根据输入来声明一个具体的结构体，那么就以 `struct` 关键字开头，
+后接结构体的名称。
+
+```rust,ignored
+// 这种方式更好
 bitflags! {
     struct S: u32 { /* ... */ }
 }
 
-// ...over no keyword...
+// 这种方式就不太好
 bitflags! {
     S: u32 { /* ... */ }
 }
 
-// ...or some ad-hoc word.
+// 这种方式也不太好
 bitflags! {
     flags S: u32 { /* ... */ }
 }
 ```
 
-Another example is semicolons vs commas. Constants in Rust are followed by
-semicolons so if your macro declares a chain of constants, they should likely be
-followed by semicolons even if the syntax is otherwise slightly different from
-Rust's.
+另一个例子是分号和逗号之间如何做出选择。
+Rust 的常量 (constants) 以分号作为结尾，所以如果你写的宏要定义一系列常量，
+那么应该在输入语法里书写分号，即使语法看起来与 Rust 的语法有些不同。
 
-```rust
-// Ordinary constants use semicolons.
+```rust,ignored
+// 原始的常量定义语法后面接的是分号
 const A: u32 = 0b000001;
 const B: u32 = 0b000010;
 
-// So prefer this...
+// 所以这种方式更好
 bitflags! {
     struct S: u32 {
         const C = 0b000100;
@@ -51,7 +50,7 @@ bitflags! {
     }
 }
 
-// ...over this.
+// 这种方式不太好
 bitflags! {
     struct S: u32 {
         const E = 0b010000,
@@ -60,18 +59,21 @@ bitflags! {
 }
 ```
 
-Macros are so diverse that these specific examples won't be relevant, but think
-about how to apply the same principles to your situation.
+宏是多样化的，以致于这里举的例子不会适合所有场景。
+但是的确要仔细思考如何应用同一套规则。
 
 
 <a id="c-macro-attr"></a>
-## Item macros compose well with attributes (C-MACRO-ATTR)
+## 宏与属性形成有机的整体 
 
-Macros that produce more than one output item should support adding attributes
-to any one of those items. One common use case would be putting individual items
-behind a cfg.
+> Item macros compose well with attributes (C-MACRO-ATTR)
 
-```rust
+生成超过一个条目 ([item]) 的宏，应该支持对每个条目添加属性。
+一个常见的例子是，把单独的条目放在 cfg 后面：
+
+[item]:https://doc.rust-lang.org/nightly/reference/items.html
+
+```rust,ignored
 bitflags! {
     struct Flags: u8 {
         #[cfg(windows)]
@@ -82,10 +84,10 @@ bitflags! {
 }
 ```
 
-Macros that produce a struct or enum as output should support attributes so that
-the output can be used with derive.
+生成结构体或枚举体的宏，应该支持添加宏属性，
+方便让输出结果使用 derive 属性。
 
-```rust
+```rust,ignored
 bitflags! {
     #[derive(Default, Serialize)]
     struct Flags: u8 {
@@ -97,14 +99,15 @@ bitflags! {
 
 
 <a id="c-anywhere"></a>
-## Item macros work anywhere that items are allowed (C-ANYWHERE)
+## 生成条目的宏可以在条目被允许的地方使用 
 
-Rust allows items to be placed at the module level or within a tighter scope
-like a function. Item macros should work equally well as ordinary items in all
-of these places. The test suite should include invocations of the macro in at
-least the module scope and function scope.
+> Item macros work anywhere that items are allowed (C-ANYWHERE)
 
-```rust
+Rust 允许条目 ([item]) 有模块级别那样的作用域或者出现在类似函数这样小的作用域里。
+生成条目的宏应该和普通的条目一样，在这些地方可以正常使用。
+测试这些宏的时，应该至少在模块和函数作用域里都调用宏。
+
+```rust,ignored
 #[cfg(test)]
 mod tests {
     test_your_macro_in_a!(module);
@@ -116,10 +119,10 @@ mod tests {
 }
 ```
 
-As a simple example of how things can go wrong, this macro works great in a
-module scope but fails in a function scope.
+下面这个例子展示了错误的宏：
+这个宏能在模块作用域里运行，但不能在函数作用域里运行。
 
-```rust
+```rust,ignored
 macro_rules! broken {
     ($m:ident :: $t:ident) => {
         pub struct $t;
@@ -129,21 +132,25 @@ macro_rules! broken {
     }
 }
 
-broken!(m::T); // okay, expands to T and m::T
+broken!(m::T); // 运行通过，可以展开成 T 和 m::T
 
 fn g() {
-    broken!(m::U); // fails to compile, super::U refers to the containing module not g
+    broken!(m::U); // 编译失败，super::U 指的是上级模块，而不是函数 g
 }
 ```
 
 
 <a id="c-macro-vis"></a>
-## Item macros support visibility specifiers (C-MACRO-VIS)
+## 生成条目的宏应支持可视分类符 
 
-Follow Rust syntax for visibility of items produced by a macro. Private by
-default, public if `pub` is specified.
+> Item macros support visibility specifiers (C-MACRO-VIS)
 
-```rust
+宏应遵循 Rust 对条目可视化 ([visibility]) 的语法要求：
+默认是私有的，如果使用 `pub` 则表明条目是公有的。
+
+[visibility]:https://doc.rust-lang.org/nightly/reference/visibility-and-privacy.html
+
+```rust,ignored
 bitflags! {
     struct PrivateFlags: u8 {
         const A = 0b0001;
@@ -161,19 +168,22 @@ bitflags! {
 
 
 <a id="c-macro-ty"></a>
-## Type fragments are flexible (C-MACRO-TY)
+## 类型分类符 `$t:ty` 是灵活的 
 
-If your macro accepts a type fragment like `$t:ty` in the input, it should be
-usable with all of the following:
+> Type fragments are flexible (C-MACRO-TY)
 
-- Primitives: `u8`, `&str`
-- Relative paths: `m::Data`
-- Absolute paths: `::base::Data`
-- Upward relative paths: `super::Data`
-- Generics: `Vec<String>`
+如果你写的宏接收 [`$t:ty`] 类型 [分类符][fragment-specifier] 作为输入，
+那么输入的内容应该与以下代码一起使用：
 
-As a simple example of how things can go wrong, this macro works great with
-primitives and absolute paths but fails with relative paths.
+- 原生类型： `u8`, `&str`
+- 相对路径： `m::Data`
+- 绝对路径： `::base::Data`
+- 上级相对路径： `super::Data`
+- 泛型： `Vec<String>`
+
+下面这个例子展示了错误的宏：
+这个宏能在很好地与原生类型、绝对路径一起使用，
+但不能和相对路径一起使用。
 
 ```rust
 macro_rules! broken {
@@ -189,5 +199,8 @@ broken!(a => u8); // okay
 broken!(b => ::std::marker::PhantomData<()>); // okay
 
 struct S;
-broken!(c => S); // fails to compile
+broken!(c => S); // 编译失败： `S` not found in this scope
 ```
+
+[`$t:ty`]:https://doc.rust-lang.org/nightly/reference/types.html
+[fragment-specifier]:https://doc.rust-lang.org/nightly/reference/macros-by-example.html#metavariables
