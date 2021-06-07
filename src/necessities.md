@@ -70,7 +70,7 @@ license = "MIT OR Apache-2.0"
 文件里面涵盖许可的正文。
 你可以在 choosealicense.com 获得这些许可，
 比如 [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
-和 [MIT](https://choosealicense.com/licenses/mit/)) 。
+和 [MIT](https://choosealicense.com/licenses/mit/) 。
 
 然后在 README.md 文件的最后写上：
 

@@ -12,7 +12,7 @@
 - [类型安全](type-safety.md)
 - [可依赖](dependability.md)
 - [可调试](debuggability.md)
-- [经得起检验](future-proofing.md)
+- [前瞻性](future-proofing.md)
 - [必要项](necessities.md)
 
 [拓展阅读](external-links.md)

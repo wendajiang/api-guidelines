@@ -63,11 +63,11 @@
 - **可调试** *( crate 易于调试 )*
   - 所有公有的类型都应该实现 `Debug` ([C-DEBUG])
   - `Debug` 呈现的内容永远不为空 ([C-DEBUG-NONEMPTY])
-- **Future proofing** *(crate is free to improve without breaking users' code)*
-  - Sealed traits protect against downstream implementations ([C-SEALED])
-  - Structs have private fields ([C-STRUCT-PRIVATE])
-  - Newtypes encapsulate implementation details ([C-NEWTYPE-HIDE])
-  - Data structures do not duplicate derived trait bounds ([C-STRUCT-BOUNDS])
+- **前瞻性** *( crate 能在不破坏使用者代码的情况下随时改进 )*
+  - 封装的 traits 隔绝下游的实现 ([C-SEALED])
+  - 结构体具有私有字段 ([C-STRUCT-PRIVATE])
+  - newtypes 封装起实现的细节 ([C-NEWTYPE-HIDE])
+  - 已经 `derive` 的数据结构不应该再使用 trait bounds ([C-STRUCT-BOUNDS])
 - **必要项** *( 对于使用者来说，这真的很重要 )*
   - 稳定版 crate 必须具有稳定的公有依赖 ([C-STABLE])
   - crate 及其依赖必须有许可证 ([C-PERMISSIVE])
