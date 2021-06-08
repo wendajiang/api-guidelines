@@ -38,7 +38,7 @@
   - 设置 html_root_url 属性 "https://docs.rs/CRATE/X.Y.Z" ([C-HTML-ROOT])
   - 发布时 记录该版本的重大变化 ([C-RELNOTES])
   - 文档不应该展示无太大帮助的实现细节 ([C-HIDDEN])
-- **可预测** *( crate 让清晰可读的代码像工作 #TODO# enables legible code that acts how it looks)*
+- **可预测** *( crate 让清晰可读的代码正如它展示的那样工作 )*
   - 智能指针不增加固有方法 ([C-SMART-PTR])
   - 类型转换的重点应放在涉及类型中最明确的类型上 ([C-CONV-SPECIFIC])
   - 有清楚接收者的函数应写成方法的形式 ([C-METHOD])
@@ -51,15 +51,15 @@
   - Caller decides where to copy and place data ([C-CALLER-CONTROL])
   - Functions minimize assumptions about parameters by using generics ([C-GENERIC])
   - Traits are object-safe if they may be useful as a trait object ([C-OBJECT])
-- **Type safety** *(crate leverages the type system effectively)*
-  - Newtypes provide static distinctions ([C-NEWTYPE])
-  - Arguments convey meaning through types, not `bool` or `Option` ([C-CUSTOM-TYPE])
-  - Types for a set of flags are `bitflags`, not enums ([C-BITFLAG])
-  - Builders enable construction of complex values ([C-BUILDER])
-- **Dependability** *(crate is unlikely to do the wrong thing)*
-  - Functions validate their arguments ([C-VALIDATE])
-  - Destructors never fail ([C-DTOR-FAIL])
-  - Destructors that may block have alternatives ([C-DTOR-BLOCK])
+- **类型安全** *( crate 应有效地利用类型系统 )*
+  - newtype 提供静态的区分功能 ([C-NEWTYPE])
+  - 参数应使用类型来表明意图 ([C-CUSTOM-TYPE])
+  - 用 `bitflags` 来存放一组标志 ([C-BITFLAG])
+  - 利用构造模式来构造复杂的值 ([C-BUILDER])
+- **可依赖** *( crate 不太可能出错 )*
+  - 函数会验证其参数 ([C-VALIDATE])
+  - 析构函数不该运行失败 ([C-DTOR-FAIL])
+  - 阻塞的析构函数应有替代的办法 ([C-DTOR-BLOCK])
 - **可调试** *( crate 易于调试 )*
   - 所有公有的类型都应该实现 `Debug` ([C-DEBUG])
   - `Debug` 呈现的内容永远不为空 ([C-DEBUG-NONEMPTY])

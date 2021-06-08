@@ -52,7 +52,7 @@ fn main() {
 由 `cargo test` 编译测试代码块，
 
 ```
-/// ```rust,ignored
+/// ```rust
 /// # use std::error::Error;
 /// #
 /// # fn main() -> Result<(), Box<dyn Error>> {

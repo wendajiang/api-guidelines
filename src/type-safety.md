@@ -1,16 +1,17 @@
-# Type safety
+# 类型安全
 
 
 <a id="c-newtype"></a>
-## Newtypes provide static distinctions (C-NEWTYPE)
+## newtype 提供静态的区分功能 
 
-Newtypes can statically distinguish between different interpretations of an
-underlying type.
+> Newtypes provide static distinctions (C-NEWTYPE)
 
-For example, a `f64` value might be used to represent a quantity in miles or in
-kilometers. Using newtypes, we can keep track of the intended interpretation:
+newtype 能静态地[^static]区分同一个里层类型不同的含义。
 
-```rust
+比如 一个 `f64` 的值可能用来表示几英里，也可能表示几公里。
+使用 newtype ，就能让我们知道这个值意图表示什么。
+
+```rust,ignored
 struct Miles(pub f64);
 struct Kilometers(pub f64);
 
@@ -22,56 +23,60 @@ impl Kilometers {
 }
 ```
 
-Once we have separated these two types, we can statically ensure that we do not
-confuse them. For example, the function
+一旦对这两种类型作区分，我们能静态地确保不把他们混为一谈。
+打个比方，下面这个函数不节能意外地调用 `Kilometers` 类型的值。
 
-```rust
+```rust,ignored
 fn are_we_there_yet(distance_travelled: Miles) -> bool { /* ... */ }
 ```
 
-cannot accidentally be called with a `Kilometers` value. The compiler will
-remind us to perform the conversion, thus averting certain [catastrophic bugs].
+编译器会提醒我们需要转换成 `Miles` ，
+从而避免了某些 [灾难性的 bugs][catastrophic bugs] 。
 
 [catastrophic bugs]: http://en.wikipedia.org/wiki/Mars_Climate_Orbiter
 
+[^static]: 译者注：之所以称之为 *static* / *statically* ，是因为 newtype 
+类型一旦被定义就不会发生变化，从而它代表的含义就是固定不变的。
 
 <a id="c-custom-type"></a>
 ## Arguments convey meaning through types, not `bool` or `Option` (C-CUSTOM-TYPE)
 
-Prefer
+请写这样的代码：
 
-```rust
+```rust,ignored
 let w = Widget::new(Small, Round)
 ```
 
-over
+而不是这样的：
 
-```rust
+```rust,ignored
 let w = Widget::new(true, false)
 ```
 
-Core types like `bool`, `u8` and `Option` have many possible interpretations.
+像 `bool` 、 `u8` 、 `Option` 这样的核心类型有很多可能的含义。
 
-Use a deliberate type (whether enum, struct, or tuple) to convey interpretation
-and invariants. In the above example, it is not immediately clear what `true`
-and `false` are conveying without looking up the argument names, but `Small` and
-`Round` are more suggestive.
+所以无论你使用枚举体、结构体还是元组，
+请经过思考定义一种类型来传达含义和 [不变性][invariants]。
+上面这个例子中，如果不看参数的名字，根据 `true` 和 `false` 
+你不能马上知道它们是什么意思，但是 `Small` 和 `Round` 就更具有联想性。
 
-Using custom types makes it easier to expand the options later on, for example
-by adding an `ExtraLarge` variant.
+使用自定义类型让后面要谈到的配置拓展更简单，比如增加一个 `ExtraLarge` 成员。
 
-See the newtype pattern ([C-NEWTYPE]) for a no-cost way to wrap existing types
-with a distinguished name.
+阅读 [newtype 模式][C-NEWTYPE] 来做到以低花销的方式封装现有类型。
+
+[invariants]: https://doc.rust-lang.org/nightly/reference/subtyping.html#variance
 
 [C-NEWTYPE]: #c-newtype
 
 
 <a id="c-bitflag"></a>
-## Types for a set of flags are `bitflags`, not enums (C-BITFLAG)
+## 用 `bitflags` 来存放一组标志 
 
-Rust supports `enum` types with explicitly specified discriminants:
+> Types for a set of flags are `bitflags`, not enums (C-BITFLAG)
 
-```rust
+Rust 支持 `enum` 类型，它可以带有显式的判别式 (discriminants) 。
+
+```rust,ignored
 enum Color {
     Red = 0xff0000,
     Green = 0x00ff00,
@@ -79,21 +84,20 @@ enum Color {
 }
 ```
 
-Custom discriminants are useful when an `enum` type needs to be serialized to an
-integer value compatibly with some other system/language. They support
-"typesafe" APIs: by taking a `Color`, rather than an integer, a function is
-guaranteed to get well-formed inputs, even if it later views those inputs as
-integers.
+当枚举类型需要被序列化成整数以便兼容其他系统或语言的时候，自定义判别式是有用的。
+判别式提供了 “类型安全” 的 APIs ：
+给函数传入 `Color` 而不是整数，就能保证得到良好形式的输入，
+即使函数把这些 `Color` 输入仍然看作是整数。
 
-An `enum` allows an API to request exactly one choice from among many. Sometimes
-an API's input is instead the presence or absence of a set of flags. In C code,
-this is often done by having each flag correspond to a particular bit, allowing
-a single integer to represent, say, 32 or 64 flags. Rust's [`bitflags`] crate
-provides a typesafe representation of this pattern.
+`enum` 允许 API 从其中刚好选择一个成员。
+有时 API 输入存在或需要一组标志 (flags) ，在 C 语言里，
+经常让每个标志 (flag) 对应上一个特定的位 (bit) ，
+比如让一个数字代表是 32 位或 64 位。
+Rust 的 [`bitflags`] crate 为这种模式提供了类型安全的解决办法。
 
 [`bitflags`]: https://github.com/bitflags/bitflags
 
-```rust
+```rust,ignored
 #[macro_use]
 extern crate bitflags;
 
@@ -124,53 +128,50 @@ fn main() {
 
 
 <a id="c-builder"></a>
-## Builders enable construction of complex values (C-BUILDER)
+## 利用构造模式来构造复杂的值 
 
-Some data structures are complicated to construct, due to their construction
-needing:
+> Builders enable construction of complex values (C-BUILDER)
 
-* a large number of inputs
-* compound data (e.g. slices)
-* optional configuration data
-* choice between several flavors
+有些数据结构构造起来很复杂，因为构造它们需要：
 
-which can easily lead to a large number of distinct constructors with many
-arguments each.
+* 大量的输入
+* 复合类型（比如 slices ）
+* 可选择的配置数据
+* 在多个可选项中做选择
 
-If `T` is such a data structure, consider introducing a `T` _builder_:
+这很容易导致许多带有不同的构造器 (constructors) ，而且每个构造器有很多参数。
 
-1. Introduce a separate data type `TBuilder` for incrementally configuring a `T`
-   value. When possible, choose a better name: e.g. [`Command`] is the builder
-   for a [child process], [`Url`] can be created from a [`ParseOptions`].
-2. The builder constructor should take as parameters only the data _required_ to
-   make a `T`.
-3. The builder should offer a suite of convenient methods for configuration,
-   including setting up compound inputs (like slices) incrementally. These
-   methods should return `self` to allow chaining.
-4. The builder should provide one or more "_terminal_" methods for actually
-   building a `T`.
+假设 `T` 是上面描述的一种数据结构，那么考虑给 `T` 引入构造器模式 (builder pattern) 。
+
+1. 引入单独的数据类型 `TBuilder` 来增量配置 `T` 的值。
+   如果可以的话，选一个更好听的名字：比如 [`Command`] 是
+   子进程 [Child][child process] 的构造器、
+   [`ParseOptions`] 是 [`Url`] 的构造器。
+2. 仅当 `T` 需要数据的时候才应该给构造器的方法传入参数。
+3. 构造器应该提供一套方便的配置方法，包括增量初始化复合型输入（像 slice 一样）。
+   这些方法应该返回 `self` 从而允许链式调用。
+4. 构造器应该提供一个或更多的最终方法来实际构造 `T` 。
 
 [`Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
 [child process]: https://doc.rust-lang.org/std/process/struct.Child.html
 [`Url`]: https://docs.rs/url/1.4.0/url/struct.Url.html
 [`ParseOptions`]: https://docs.rs/url/1.4.0/url/struct.ParseOptions.html
 
-The builder pattern is especially appropriate when building a `T` involves side
-effects, such as spawning a task or launching a process.
+构造器模式尤其适合于 构造 `T` 时涉及意外的连带后果 的场景，
+比如开始一个任务或开启一个进程。
 
-In Rust, there are two variants of the builder pattern, differing in the
-treatment of ownership, as described below.
+Rust 里有两种构造器模式，区别在于处理所有权上：
 
-### Non-consuming builders (preferred)
+### 非消耗型构造器
 
-In some cases, constructing the final `T` does not require the builder itself to
-be consumed. The following variant on [`std::process::Command`] is one example:
+
+有些情况构造最终的 `T` 不需要构造器被消耗掉 (constructing) 。
+下面这个例子是 [`std::process::Command`] 的简化版：
 
 [`std::process::Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
 
-```rust
-// NOTE: the actual Command API does not use owned Strings;
-// this is a simplified version.
+```rust,ignored
+// 注意：这是一个简化的版本，实际中 Command API 不使用有所有权的 String
 
 pub struct Command {
     program: String,
@@ -188,48 +189,44 @@ impl Command {
         }
     }
 
-    /// Add an argument to pass to the program.
+    /// 增加一个命令行参数以传给程序
     pub fn arg(&mut self, arg: String) -> &mut Command {
         self.args.push(arg);
         self
     }
 
-    /// Add multiple arguments to pass to the program.
+    /// 增加多个命令行参数以传给程序
     pub fn args(&mut self, args: &[String]) -> &mut Command {
         self.args.extend_from_slice(args);
         self
     }
 
-    /// Set the working directory for the child process.
+    /// 设置子进程工作目录
     pub fn current_dir(&mut self, dir: String) -> &mut Command {
         self.cwd = Some(dir);
         self
     }
 
-    /// Executes the command as a child process, which is returned.
+    /// 以子进程方式执行命令，然后返回子进程
     pub fn spawn(&self) -> io::Result<Child> {
         /* ... */
     }
 }
 ```
+注意 `spawn` 方法实际上利用构造器的配置来开启一个进程，
+以共享引用的方式使用了构造器，
+因为开启进程无需配置数据的所有权。
+而且用于配置的方法传入和返回 `self` 的可变引用。
 
-Note that the `spawn` method, which actually uses the builder configuration to
-spawn a process, takes the builder by shared reference. This is possible because
-spawning the process does not require ownership of the configuration data.
+这种方式的优点：
+整个过程都使用借用，`Command` 能方便地以一行或更复杂的方式使用。
+**推荐** 使用这种方式。
 
-Because the terminal `spawn` method only needs a reference, the configuration
-methods take and return a mutable borrow of `self`.
-
-#### The benefit
-
-By using borrows throughout, `Command` can be used conveniently for both
-one-liner and more complex constructions:
-
-```rust
-// One-liners
+```rust,ignored
+// 用一行进行配置
 Command::new("/bin/cat").arg("file.txt").spawn();
 
-// Complex configuration
+// 进行复杂的配置
 let mut cmd = Command::new("/bin/ls");
 cmd.arg(".");
 if size_sorted {
@@ -238,62 +235,61 @@ if size_sorted {
 cmd.spawn();
 ```
 
-### Consuming builders
+### 消耗型构造器
 
-Sometimes builders must transfer ownership when constructing the final type `T`,
-meaning that the terminal methods must take `self` rather than `&self`.
+有时候，为了构造出最后的 `T` ，构造器必须传递所有权。
+这意味着必须给方法传入 `self` 而不是 `&self` 。
 
-```rust
+```rust,ignored
 impl TaskBuilder {
-    /// Name the task-to-be.
+    /// 给将要运行的任务命名
     pub fn named(mut self, name: String) -> TaskBuilder {
         self.name = Some(name);
         self
     }
 
-    /// Redirect task-local stdout.
+    /// 把本地任务的 stdout 重新定向
     pub fn stdout(mut self, stdout: Box<io::Write + Send>) -> TaskBuilder {
         self.stdout = Some(stdout);
         self
     }
 
-    /// Creates and executes a new child task.
+    /// 创建和执行新的子任务
     pub fn spawn<F>(self, f: F) where F: FnOnce() + Send {
         /* ... */
     }
 }
 ```
 
-Here, the `stdout` configuration involves passing ownership of an `io::Write`,
-which must be transferred to the task upon construction (in `spawn`).
+在这里， `stdout` 配置涉及到传传递 `io::Write` 的所有权，
+所以必须在构造的时候（ `spawn` 方法里面）再传递给任务。
 
-When the terminal methods of the builder require ownership, there is a basic
-tradeoff:
+当最终的构造器需要所有权时，面临一个基本的抉择：
 
-* If the other builder methods take/return a mutable borrow, the complex
-  configuration case will work well, but one-liner configuration becomes
-  impossible.
+* 如果其他的构造方法被传入或者返回 可变借用 `&mut self` ，
+  那么复杂的配置情况也能很好地工作，但是不可能用一行完成所有配置。
+* 如果其他的构造方法被传入或者返回 有所有权的 `self` ，
+  可以很好地使用一行来进行所有配置，但是在进行复杂配置时就不太方便。
 
-* If the other builder methods take/return an owned `self`, one-liners continue
-  to work well but complex configuration is less convenient.
+遵循 “让简单的事简单完成，困难的事也可能完成” 这句箴言，
+消耗型构造器所有的方法都应该被传入和返回有所有权的 `self` 。
+用户的代码可以像下面这样工作：
 
-Under the rubric of making easy things easy and hard things possible, all
-builder methods for a consuming builder should take and return an owned
-`self`. Then client code works as follows:
-
-```rust
-// One-liners
+```rust,ignored
+// 用一行进行配置
 TaskBuilder::new("my_task").spawn(|| { /* ... */ });
 
-// Complex configuration
+// 进行复杂的配置
 let mut task = TaskBuilder::new();
-task = task.named("my_task_2"); // must re-assign to retain ownership
+task = task.named("my_task_2"); // 必须重新赋值出去，从而获得所有权
 if reroute {
     task = task.stdout(mywriter);
 }
 task.spawn(|| { /* ... */ });
 ```
 
-One-liners work as before, because ownership is threaded through each of the
-builder methods until being consumed by `spawn`. Complex configuration, however,
-is more verbose: it requires re-assigning the builder at each step.
+一行配置的方式像上一个方法那样可以工作，
+因为所有权在每个构造器方法上依次传递，
+直到被 `spawn` 消耗掉。
+然而复杂配置的情况更啰嗦：
+在最后一步需要把构造器重新赋值给一个变量。

@@ -1,92 +1,88 @@
-# Dependability
+# 可依赖
 
 
 <a id="c-validate"></a>
-## Functions validate their arguments (C-VALIDATE)
+## 函数会验证其参数 
 
-Rust APIs do _not_ generally follow the [robustness principle]: "be conservative
-in what you send; be liberal in what you accept".
+> Functions validate their arguments (C-VALIDATE)
+
+Rust APIs 不遵循 [稳健性法则][robustness principle]：
+对己方保守，对他方宽容。
 
 [robustness principle]: http://en.wikipedia.org/wiki/Robustness_principle
 
-Instead, Rust code should _enforce_ the validity of input whenever practical.
+正相反， Rust 代码应该在任何可以 **强制** 校验其输入的时候进行强制校验。
 
-Enforcement can be achieved through the following mechanisms (listed in order of
-preference).
+可以通过以下机制来实现强制验证。出现的顺序代表性能高低。
 
-### Static enforcement
+### 静态验证
 
-Choose an argument type that rules out bad inputs.
+给输入限制在类型上，排除掉不符合的输入。
+比如，请这样写：
 
-For example, prefer
 
-```rust
+```rust,ignored
 fn foo(a: Ascii) { /* ... */ }
 ```
 
-over
+而不是这样写：
 
-```rust
+```rust,ignored
 fn foo(a: u8) { /* ... */ }
 ```
 
-where `Ascii` is a _wrapper_ around `u8` that guarantees the highest bit is
-zero; see newtype patterns ([C-NEWTYPE]) for more details on creating typesafe
-wrappers.
+`Ascii` 是对 `u8` 类型的包装器 (wrapper) ，从而保证最高位是零。
+参考 [newtype][C-NEWTYPE] 模式，来详细了解生成类型安全的包装器。
 
-Static enforcement usually comes at little run-time cost: it pushes the costs to
-the boundaries (e.g. when a `u8` is first converted into an `Ascii`). It also
-catches bugs early, during compilation, rather than through run-time failures.
+静态验证 (static enforcement) 通常具有很少的运行时代价：
+它的代价在于边界，例如在 `u8` 首先转换为 `Ascii` 类型的时候。
+它也能在早期发现 bugs ，在编译期发现，而不是在运行失败的时候才发现。
 
-On the other hand, some properties are difficult or impossible to express using
-types.
+可是，有些性质很难或者不可能用类型来描述。
 
 [C-NEWTYPE]: type-safety.html#c-newtype
 
-### Dynamic enforcement
+### 动态验证 
 
-Validate the input as it is processed (or ahead of time, if necessary). Dynamic
-checking is often easier to implement than static checking, but has several
-downsides:
+动态验证 (dynamic enforcement) 即 在处理的时候（如果有必要的话处理之前） 校验输入。
+动态检查通常比静态检查更容易实现，但是有以下几个缺点：
 
-1. Runtime overhead (unless checking can be done as part of processing the
-   input).
-2. Delayed detection of bugs.
-3. Introduces failure cases, either via `panic!` or `Result`/`Option` types,
-   which must then be dealt with by client code.
+- 运行时开销（除非动态检查是处理输入的一部分）
+- bugs 检测不及时
+- 带来失败的情况，用户的代码需要通过 `panic!` ，或者 `Result` / `Option` 
+  类型处理。
 
-#### Dynamic enforcement with `debug_assert!`
+1. 使用 [`debug_assert!`] 。
+在构建生产版本的时候可以关掉高花销的检查。
 
-Same as dynamic enforcement, but with the possibility of easily turning off
-expensive checks for production builds.
+2. 增加不进行检查的同类函数。
+通常用 `_unchecked` 后缀来标记这个函数不进行某些检查，
+或者把函数放在 `raw` 的子模块下面。\
+在下面两个场景下使用 unchecked 函数是明智的：
+为了更高的性能；使用者确信输入的数据是有效的。
 
-#### Dynamic enforcement with opt-out
-
-Same as dynamic enforcement, but adds sibling functions that opt out of the
-checking.
-
-The convention is to mark these opt-out functions with a suffix like
-`_unchecked` or by placing them in a `raw` submodule.
-
-The unchecked functions can be used judiciously in cases where (1) performance
-dictates avoiding checks and (2) the client is otherwise confident that the
-inputs are valid.
-
+[`debug_assert!`]: http://129.28.186.100/rust-docs/rust/html/std/macro.debug_assert.html
 
 <a id="c-dtor-fail"></a>
-## Destructors never fail (C-DTOR-FAIL)
+## 析构函数不该运行失败 
 
-Destructors are executed on task failure, and in that context a failing
-destructor causes the program to abort.
+> Destructors never fail (C-DTOR-FAIL)
 
-Instead of failing in a destructor, provide a separate method for checking for
-clean teardown, e.g. a `close` method, that returns a `Result` to signal
-problems.
+析构函数 (destructor) 在某项任务失败的时候也会执行，
+如果析构函数运行失败的话程序就会中断且退出。
+
+所以为了不让析构函数失败，应该单独提供用于检查的方法。
+比如 `close` 方法就返回 `Result` 来表明遇到了问题。
 
 
 <a id="c-dtor-block"></a>
-## Destructors that may block have alternatives (C-DTOR-BLOCK)
+## 阻塞的析构函数应有替代的办法 
 
-Similarly, destructors should not invoke blocking operations, which can make
-debugging much more difficult. Again, consider providing a separate method for
-preparing for an infallible, nonblocking teardown.
+> Destructors that may block have alternatives (C-DTOR-BLOCK)
+
+同样，析构函数不应该调用造成阻塞的操作，
+阻塞会让调试更困难。
+
+重申一遍，考虑提供单独的方法来为意外做万无一失而畅通无阻的准备。
+
+[destructor]: https://doc.rust-lang.org/nightly/reference/destructors.html
