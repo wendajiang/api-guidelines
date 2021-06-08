@@ -39,7 +39,9 @@ fn are_we_there_yet(distance_travelled: Miles) -> bool { /* ... */ }
 类型一旦被定义就不会发生变化，从而它代表的含义就是固定不变的。
 
 <a id="c-custom-type"></a>
-## Arguments convey meaning through types, not `bool` or `Option` (C-CUSTOM-TYPE)
+## 参数应使用类型来表明意图 
+
+> Arguments convey meaning through types, not `bool` or `Option` (C-CUSTOM-TYPE)
 
 请写这样的代码：
 
