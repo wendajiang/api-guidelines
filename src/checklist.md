@@ -38,14 +38,14 @@
   - 设置 html_root_url 属性 "https://docs.rs/CRATE/X.Y.Z" ([C-HTML-ROOT])
   - 发布时 记录该版本的重大变化 ([C-RELNOTES])
   - 文档不应该展示无太大帮助的实现细节 ([C-HIDDEN])
-- **Predictability** *(crate enables legible code that acts how it looks)*
-  - Smart pointers do not add inherent methods ([C-SMART-PTR])
-  - Conversions live on the most specific type involved ([C-CONV-SPECIFIC])
-  - Functions with a clear receiver are methods ([C-METHOD])
-  - Functions do not take out-parameters ([C-NO-OUT])
-  - Operator overloads are unsurprising ([C-OVERLOAD])
-  - Only smart pointers implement `Deref` and `DerefMut` ([C-DEREF])
-  - Constructors are static, inherent methods ([C-CTOR])
+- **可预测** *( crate 让清晰可读的代码像工作 #TODO# enables legible code that acts how it looks)*
+  - 智能指针不增加固有方法 ([C-SMART-PTR])
+  - 类型转换的重点应放在涉及类型中最明确的类型上 ([C-CONV-SPECIFIC])
+  - 有清楚接收者的函数应写成方法的形式 ([C-METHOD])
+  - 函数不该把返回值作为其参数 ([C-NO-OUT])
+  - 重载运算符不足为奇 ([C-OVERLOAD])
+  - 只对智能指针实现 `Deref` 和 `DerefMut` trait ([C-DEREF])
+  - 构造函数是静态的、固有的方法 ([C-CTOR])
 - **Flexibility** *(crate supports diverse real-world use cases)*
   - Functions expose intermediate results to avoid duplicate work ([C-INTERMEDIATE])
   - Caller decides where to copy and place data ([C-CALLER-CONTROL])
