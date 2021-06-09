@@ -167,7 +167,7 @@ Rust 里有两种构造器模式，区别在于处理所有权上：
 ### 非消耗型构造器
 
 
-有些情况构造最终的 `T` 不需要构造器被消耗掉 (constructing) 。
+有些情况构造最终的 `T` 不需要构造器被消耗掉 (consume) 。
 下面这个例子是 [`std::process::Command`] 的简化版：
 
 [`std::process::Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
