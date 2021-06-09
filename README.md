@@ -6,7 +6,8 @@
 
 阅读地址：
 [原版](https://rust-lang.github.io/api-guidelines) |
-[中文版](https://zjp-cn.github.io/api-guidelines)
+[中文版](https://zjp-cn.github.io/api-guidelines) |
+[国内站点](http://129.28.186.100/api-guidelines)
 
 ## 加入讨论
 
