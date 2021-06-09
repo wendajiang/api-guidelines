@@ -1,27 +1,28 @@
 # Rust API 编写指南
 
-This is a set of recommendations on how to design and present APIs for
-the Rust programming language. They are authored largely by the Rust
-library team, based on experiences building the Rust standard library
-and other crates in the Rust ecosystem.
+这是一组关于如何设计和呈现 Rust APIs 的建议。
+这些建议主要由 Rust library 团队编写，
+总结了 Rust 生态下构建标准库和其他 crates 的经验。
 
-[Read them here](https://rust-lang.github.io/api-guidelines).
+阅读地址：
+[原版](https://rust-lang.github.io/api-guidelines) |
+[中文版](https://zjp-cn.github.io/api-guidelines)
 
-## Join the discussion
+## 加入讨论
 
-See the [Discussions](https://github.com/rust-lang/api-guidelines/discussions)
-tab for proposing new API guidelines, asking questions about how to apply them,
-and for proposing new ones.
+查看 [讨论](https://github.com/rust-lang/api-guidelines/discussions)
+页面来提出新的 API 编写指南、对如何使用这些指南进行提问。
 
-## License
+## 版权
 
-This project is licensed under either of [Apache License, Version
-2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT), at your option.
+这个项目具有 
+[Apache License, Version 2.0](LICENSE-APACHE) 或
+[MIT license](LICENSE-MIT)
+双重许可，供你选择。
 
-## Contribution
+## 贡献
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in this project by you, as defined in the Apache 2.0 license,
-shall be dual licensed as above, without any additional terms or conditions.
+除非你明确声明，否则您有意提交的任何包含在本项目中的贡献，
+正如 Apache 2.0 许可证中所定义，应具有上述双重许可，无任何附加条款或条件。
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+查看 [贡献说明](CONTRIBUTING.md) 。
